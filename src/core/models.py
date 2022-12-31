@@ -14,11 +14,24 @@ class UserManager(BaseUserManager):
 
     def create_user(self, email: str, password: str = None, **kwargs) -> User:
         """Cria, salva e retorna um novo User."""
+        if not email:
+            raise ValueError('ERRO: User precisa de um e-mail válido.')
+
         user: User = self.model(email=self.normalize_email(email), **kwargs)
         user.set_password(password)
         user.save(using=self._db)
 
         return user
+
+    def create_superuser(self, email: str, password: str) -> User:
+        """Cria, salva e retorna um Superuser."""
+        _user = self.create_user(email=email, password=password)
+
+        _user.is_staff = True
+        _user.is_superuser = True
+        _user.save(using=self._db)
+
+        return _user
 
 
 class User(AbstractBaseUser, PermissionsMixin):
