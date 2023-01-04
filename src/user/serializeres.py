@@ -7,6 +7,7 @@ from django.contrib.auth import (
 from django.utils.translation import gettext as _
 
 from rest_framework import serializers
+from core.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -17,9 +18,20 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['email', 'password', 'name']
         extra_kwargs = {'password': {'write_only': True, 'min_length': 5}}
 
-    def create(self, validated_data):
+    def create(self, validated_data: dict) -> User:
         """Cria e retorna um User com password criptografado."""
         return get_user_model().objects.create_user(**validated_data)
+
+    def update(self, instance, validated_data: dict) -> User:
+        """Atualiza e retorna um User."""
+        password = validated_data.pop('password', None)
+        user: User = super().update(instance, validated_data)
+
+        if password:
+            user.set_password(password)
+            user.save()
+
+        return user
 
 
 class AuthTokenSerializer(serializers.Serializer):
