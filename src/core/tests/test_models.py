@@ -9,7 +9,7 @@ from decimal import Decimal
 from core import models
 
 
-def create_user(email='user@example.com', password='testpass123'):
+def create_user(email, password):
     """Cria e retorna um novo usuário."""
     return get_user_model().objects.create_user(email, password)
 
@@ -21,7 +21,7 @@ class ModelTests(TestCase):
         """Testa a criação de um User com sucesso."""
         email_test = "test@test.com"
         password_test = "test123"
-        user = get_user_model().objects.create_user(
+        user = create_user(
             email=email_test,
             password=password_test,
         )
@@ -43,13 +43,13 @@ class ModelTests(TestCase):
         ]
 
         for email, expected in sample_emails:
-            user = get_user_model().objects.create_user(email, 'test123')
+            user = create_user(email, 'test123')
             self.assertEqual(user.email, expected)
 
     def test_new_user_without_email_raises_error(self):
         """Testa a criação de User sem e-mail Raise ValueError."""
         with self.assertRaises(ValueError):
-            get_user_model().objects.create_user('', 'test123')
+            create_user('', 'test123')
 
     def test_create_superuser_success(self):
         """Testa a criação de Superuser com sucesso."""
@@ -59,3 +59,18 @@ class ModelTests(TestCase):
         )
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
+
+    def test_create_post(self):
+        """Testa a criação de um post com sucesso."""
+        _user = create_user(
+            'test@example.com',
+            'testpass123',
+        )
+        _post = models.Post.objects.create(
+            user=_user,
+            title='Test Title',
+            desc_post='Test Desc',
+            post='Test Post'
+        )
+
+        self.assertEqual(str(_post), _post.title)

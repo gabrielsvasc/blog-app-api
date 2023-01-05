@@ -1,12 +1,15 @@
 """Models da API."""
 
 from __future__ import annotations
+
 from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,
     PermissionsMixin,
 )
+from django.conf import settings
+from django.utils import timezone
 
 
 class UserManager(BaseUserManager):
@@ -35,7 +38,7 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    """Model para User da API."""
+    """Model para Users da API."""
     email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=60)
     is_active = models.BooleanField(default=True)
@@ -44,3 +47,18 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
+
+
+class Post(models.Model):
+    """Model para Posts da API."""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    title = models.CharField(max_length=120)
+    desc_post = models.TextField()
+    post = models.TextField()
+    datetime = models.DateTimeField(default=timezone.now)
+
+    def __str__(self) -> str:
+        return self.title
