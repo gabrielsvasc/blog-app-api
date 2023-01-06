@@ -7,7 +7,7 @@ from rest_framework.routers import DefaultRouter
 from post import views
 
 router = DefaultRouter()
-router.register('list', views.PostListViewSet, basename='listar')
+router.register('', views.PostListViewSet, basename='listar')
 
 app_name = 'post'
 

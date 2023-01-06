@@ -10,3 +10,9 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = ['id', 'title', 'desc_post', 'datetime']
         read_only_fields = ['id']
+
+
+class PostDetailSerializer(PostSerializer):
+    """Serializer para o detalhamento do Post."""
+    class Meta(PostSerializer.Meta):
+        fields = PostSerializer.Meta.fields + ['post']

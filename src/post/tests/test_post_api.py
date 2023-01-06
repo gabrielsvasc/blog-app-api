@@ -7,7 +7,10 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from core.models import Post
-from post.serializers import PostSerializer
+from post.serializers import (
+    PostSerializer,
+    PostDetailSerializer
+)
 
 
 POST_URL = reverse('post:listar-list')
@@ -17,6 +20,11 @@ def create_user(email='user@example.com', password='testpass123'):
     """Cria e retorna um novo usuário."""
 
     return get_user_model().objects.create_user(email=email, password=password)
+
+
+def detail_url(post_id):
+    """Retorna os detalhes de um Post."""
+    return reverse('post:listar-detail', args=[post_id])
 
 
 def create_post(user, title, desc_post, post) -> Post:
@@ -31,11 +39,6 @@ def create_post(user, title, desc_post, post) -> Post:
     return post
 
 
-def detail_url(ingredient_id):
-    """Cria e retorna uma url com Posts detalhados."""
-    return reverse('recipe:ingredient-detail', args=[ingredient_id])
-
-
 class PublicIngredientsApiTests(TestCase):
     """Testes de requisições não autenticadas."""
 
@@ -44,6 +47,7 @@ class PublicIngredientsApiTests(TestCase):
         self.client = APIClient()
 
     def test_retrieve_posts(self):
+        """Testa o retorno com todos os Posts."""
         create_post(
             user=self.user,
             title='title 1',
@@ -63,4 +67,19 @@ class PublicIngredientsApiTests(TestCase):
         serializer = PostSerializer(posts, many=True)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, serializer.data)
+
+    def test_get_post_detail(self):
+        """Testa o retorno com os detalhes do Post desejado."""
+        _post = create_post(
+            user=self.user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+
+        url = detail_url(_post.id)
+        res = self.client.get(url)
+
+        serializer = PostDetailSerializer(_post)
         self.assertEqual(res.data, serializer.data)
