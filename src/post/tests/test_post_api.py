@@ -13,7 +13,8 @@ from post.serializers import (
 )
 
 
-POST_URL = reverse('post:listar-list')
+POST_PUBLIC_URL = reverse('post:public-list')
+POST_CREATE_URL = reverse('post:private-publish')
 
 
 def create_user(email='user@example.com', password='testpass123'):
@@ -24,7 +25,7 @@ def create_user(email='user@example.com', password='testpass123'):
 
 def detail_url(post_id):
     """Retorna os detalhes de um Post."""
-    return reverse('post:listar-detail', args=[post_id])
+    return reverse('post:public-detail', args=[post_id])
 
 
 def create_post(user, title, desc_post, post) -> Post:
@@ -39,7 +40,7 @@ def create_post(user, title, desc_post, post) -> Post:
     return post
 
 
-class PublicIngredientsApiTests(TestCase):
+class PublicPostApiTests(TestCase):
     """Testes de requisições não autenticadas."""
 
     def setUp(self) -> None:
@@ -61,7 +62,7 @@ class PublicIngredientsApiTests(TestCase):
             post='post 2',
         )
 
-        res = self.client.get(POST_URL)
+        res = self.client.get(POST_PUBLIC_URL)
 
         posts = Post.objects.all().order_by('-id')
         serializer = PostSerializer(posts, many=True)
@@ -83,3 +84,51 @@ class PublicIngredientsApiTests(TestCase):
 
         serializer = PostDetailSerializer(_post)
         self.assertEqual(res.data, serializer.data)
+
+    def test_post_method_auth_required(self):
+        """Testa a necessidade de autenticação no método POST."""
+        _payload = {
+            'title': 'Test Title Fail',
+            'desc_post': 'Test Description Fail',
+            'post': 'Test Post Fail',
+        }
+        res = self.client.post(POST_CREATE_URL, _payload)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class PrivatePostApiTests(TestCase):
+    """Testes de requisições autenticadas."""
+
+    def setUp(self) -> None:
+        self.user = create_user()
+        self.client = APIClient()
+        self.client.force_authenticate(self.user)
+
+    def test_post_publish_success(self):
+        """Testa uma requisição com sucesso para a rota publish."""
+        _payload = {
+            'title': 'Test Title Fail',
+            'desc_post': 'Test Description Fail',
+            'post': 'Test Post Fail',
+        }
+
+        res = self.client.post(POST_CREATE_URL, _payload)
+        _post = Post.objects.get(id=res.data['id'])
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(_post.user, self.user)
+
+        for k, v in _payload.items():
+            self.assertEqual(getattr(_post, k), v)
+
+    def test_post_publish_unvalidated_data(self):
+        """Testa uma requisição para a rota publish com dados inválidos."""
+        _payload = {
+            'title': 'Test Title Fail',
+            'post': 'Test Post Fail',
+        }
+
+        res = self.client.post(POST_CREATE_URL, _payload)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)

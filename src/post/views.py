@@ -5,26 +5,57 @@ from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.request import Request
 
 from core.models import Post
 from post.serializers import PostSerializer, PostDetailSerializer
 
 
-class PostListViewSet(viewsets.ViewSet):
-    """ViewSet para a rota Post."""
+class PostPrivateViewSet(viewsets.ViewSet):
+    """View para as rotas privadas do Post."""
+    serializer_class = PostDetailSerializer
+    queryset = Post.objects.all().order_by('-id')
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @action(methods=['POST'], detail=False)
+    def publish(self, request: Request) -> Response:
+        """Recebe os valores para criação de um Post, se forem validos retorna HTTP 201
+        e se não retorna HTTP 400."""
+        serializer = self.serializer_class(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
+
+
+class PostPublicViewSet(viewsets.ViewSet):
+    """View para as rotas públicas do Post."""
+    queryset = Post.objects.all().order_by('-id')
     authentication_classes = [TokenAuthentication]
     permission_classes = [AllowAny]
 
-    def list(self, request: any) -> PostSerializer:
-        """Retorna todos os Posts de forma resumida."""
-        queryset = Post.objects.all().order_by('-id')
-        serializer = PostSerializer(queryset, many=True)
+    def get_serializer_class(self) -> PostSerializer | PostDetailSerializer:
+        """Define o Serializer usado em cada método."""
+        if self.action == 'list':
+            return PostSerializer
+        else:
+            return PostDetailSerializer
+
+    def list(self, request: Request) -> Response:
+        """Retorna uma lista com todos os Posts resumidos."""
+        _get_serializer = self.get_serializer_class()
+        serializer: PostSerializer = _get_serializer(self.queryset, many=True)
+
         return Response(serializer.data)
 
-    def retrieve(self, request: any, pk: int = None) -> PostDetailSerializer:
-        """Retorna apenas um Post com todos detalhes."""
-        queryset = Post.objects.all()
-        user = get_object_or_404(queryset, pk=pk)
-        serializer = PostDetailSerializer(user)
+    def retrieve(self, request: Request, pk: int = None) -> Response:
+        """Retorna um Post específico."""
+        _get_serializer = self.get_serializer_class()
+        _post = get_object_or_404(self.queryset, pk=pk)
+        serializer: PostDetailSerializer = _get_serializer(_post)
 
         return Response(serializer.data)
