@@ -15,7 +15,6 @@ from post.serializers import (
 
 POST_PUBLIC_URL = reverse('post:public-list')
 POST_CREATE_URL = reverse('post:private-publish')
-# POST_PATCH_URL = reverse('post:private-partial-update')
 
 
 def create_user(email='user@example.com', password='testpass123'):
