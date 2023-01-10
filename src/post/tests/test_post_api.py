@@ -176,23 +176,23 @@ class PrivatePostApiTests(TestCase):
 
         self.assertEqual(_post.title, _payload['title'])
 
-    # def test_patch_post_with_other_user(self):
-    #     """Testa o update_post apenas para o usuário atrelado ao Post."""
-    #     _user = create_user(
-    #         email='user2@test.com',
-    #         password='pass123'
-    #     )
-    #     _post = create_post(
-    #         user=_user,
-    #         title='title 1',
-    #         desc_post='desc 1',
-    #         post='post 1',
-    #     )
-    #     _payload = {
-    #         'title': 'Test Title Fail'
-    #     }
+    def test_patch_post_with_other_user(self):
+        """Testa o update_post apenas para o usuário atrelado ao Post."""
+        _user = create_user(
+            email='user2@test.com',
+            password='pass123'
+        )
+        _post = create_post(
+            user=_user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+        _payload = {
+            'title': 'Test Title Fail'
+        }
 
-    #     url = patch_url(_post.id)
-    #     res = self.client.patch(url, _payload)
+        url = patch_url(_post.id)
+        res = self.client.patch(url, _payload)
 
-    #     self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)

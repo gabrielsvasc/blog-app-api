@@ -1,6 +1,7 @@
 """Serializer para a rota de Posts da API."""
 
 from rest_framework import serializers
+from rest_framework.request import Request
 from core.models import Post
 
 
@@ -16,3 +17,12 @@ class PostDetailSerializer(PostSerializer):
     """Serializer para o detalhamento do Post."""
     class Meta(PostSerializer.Meta):
         fields = PostSerializer.Meta.fields + ['post']
+
+    def is_valid_user(self, instance: Post, request: Request) -> bool:
+        serializer_user = instance.user
+        request_user = request.user
+
+        if (serializer_user == request_user):
+            return True
+
+        return False

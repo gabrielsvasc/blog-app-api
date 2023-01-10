@@ -39,10 +39,12 @@ class PostPrivateViewSet(
             instance=_post, data=request.data, partial=True)
 
         if serializer.is_valid():
-            # if serializer.is_valid_user(_post, request.data['user']):
-            serializer.save()
+            if serializer.is_valid_user(_post, request):
+                serializer.save()
 
-            return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            return Response(serializer.data, status.HTTP_401_UNAUTHORIZED)
 
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
