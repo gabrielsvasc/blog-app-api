@@ -1,5 +1,5 @@
 """Views para a rota de Posts da API."""
-from rest_framework import viewsets, mixins, status
+from rest_framework import viewsets, mixins, status, generics
 from rest_framework.authentication import TokenAuthentication
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -11,14 +11,14 @@ from core.models import Post
 from post.serializers import PostSerializer, PostDetailSerializer
 
 
-class PostPrivateViewSet(viewsets.ViewSet):
+class PostPrivateViewSet(
+        viewsets.ViewSet):
     """View para as rotas privadas do Post."""
     serializer_class = PostDetailSerializer
     queryset = Post.objects.all().order_by('-id')
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    @action(methods=['POST'], detail=False)
     def publish(self, request: Request) -> Response:
         """Recebe os valores para criação de um Post, se forem validos retorna HTTP 201
         e se não retorna HTTP 400."""
@@ -28,6 +28,21 @@ class PostPrivateViewSet(viewsets.ViewSet):
             serializer.save(user=request.user)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
+
+    def update_post(self, request: Request, pk: int = None):
+        """Recebe os valores para atualização do Post, se forem validos retorna HTTP 201
+        e se não retorna HTTP 400."""
+        _post = get_object_or_404(self.queryset, pk=pk)
+        serializer = self.serializer_class(
+            instance=_post, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            # if serializer.is_valid_user(_post, request.data['user']):
+            serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 

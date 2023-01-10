@@ -15,6 +15,7 @@ from post.serializers import (
 
 POST_PUBLIC_URL = reverse('post:public-list')
 POST_CREATE_URL = reverse('post:private-publish')
+# POST_PATCH_URL = reverse('post:private-partial-update')
 
 
 def create_user(email='user@example.com', password='testpass123'):
@@ -26,6 +27,11 @@ def create_user(email='user@example.com', password='testpass123'):
 def detail_url(post_id):
     """Retorna os detalhes de um Post."""
     return reverse('post:public-detail', args=[post_id])
+
+
+def patch_url(post_id):
+    """Retorna a rota patch de um Post."""
+    return reverse('post:private-update', args=[post_id])
 
 
 def create_post(user, title, desc_post, post) -> Post:
@@ -96,6 +102,24 @@ class PublicPostApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_patch_method_auth_required(self):
+        """Testa a necessidade de autenticação no método PATCH."""
+        _post = create_post(
+            user=self.user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+        _payload = {
+            'title': 'Test Title Fail'
+        }
+
+        url = patch_url(_post.id)
+
+        res = self.client.patch(url, _payload)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 class PrivatePostApiTests(TestCase):
     """Testes de requisições autenticadas."""
@@ -132,3 +156,44 @@ class PrivatePostApiTests(TestCase):
         res = self.client.post(POST_CREATE_URL, _payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_patch_post_success(self):
+        """Testa uma requisição com sucesso para a rota update_post."""
+        _post = create_post(
+            user=self.user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+        _payload = {
+            'title': 'Test Title Fail'
+        }
+
+        url = patch_url(_post.id)
+        res = self.client.patch(url, _payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        _post.refresh_from_db()
+
+        self.assertEqual(_post.title, _payload['title'])
+
+    # def test_patch_post_with_other_user(self):
+    #     """Testa o update_post apenas para o usuário atrelado ao Post."""
+    #     _user = create_user(
+    #         email='user2@test.com',
+    #         password='pass123'
+    #     )
+    #     _post = create_post(
+    #         user=_user,
+    #         title='title 1',
+    #         desc_post='desc 1',
+    #         post='post 1',
+    #     )
+    #     _payload = {
+    #         'title': 'Test Title Fail'
+    #     }
+
+    #     url = patch_url(_post.id)
+    #     res = self.client.patch(url, _payload)
+
+    #     self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
