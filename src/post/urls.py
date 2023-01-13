@@ -23,6 +23,13 @@ class PostPrivateRouter(DefaultRouter):
             name='{basename}-update',
             detail=True,
             initkwargs={}
+        ),
+        Route(
+            url=r'^{prefix}/delete/{lookup}$',
+            mapping={'delete': 'delete_post'},
+            name='{basename}-delete',
+            detail=True,
+            initkwargs={}
         )
     ]
 

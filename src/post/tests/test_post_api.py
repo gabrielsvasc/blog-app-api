@@ -33,6 +33,11 @@ def patch_url(post_id):
     return reverse('post:private-update', args=[post_id])
 
 
+def delete_url(post_id):
+    """Retorna a rota patch de um Post."""
+    return reverse('post:private-delete', args=[post_id])
+
+
 def create_post(user, title, desc_post, post) -> Post:
     """Cria e retorna um novo post."""
     post = Post.objects.create(
@@ -119,6 +124,21 @@ class PublicPostApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_delete_method_auth_required(self):
+        """Testa a necessidade de autenticação no método DELETE."""
+        _post = create_post(
+            user=self.user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+
+        url = delete_url(_post.id)
+
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 class PrivatePostApiTests(TestCase):
     """Testes de requisições autenticadas."""
@@ -157,7 +177,7 @@ class PrivatePostApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_patch_post_success(self):
-        """Testa uma requisição com sucesso para a rota update_post."""
+        """Testa uma requisição com sucesso para a rota update."""
         _post = create_post(
             user=self.user,
             title='title 1',
@@ -177,7 +197,7 @@ class PrivatePostApiTests(TestCase):
         self.assertEqual(_post.title, _payload['title'])
 
     def test_patch_post_with_other_user(self):
-        """Testa o update_post apenas para o usuário atrelado ao Post."""
+        """Testa o update permitido apenas para o usuário atrelado ao Post."""
         _user = create_user(
             email='user2@test.com',
             password='pass123'
@@ -196,3 +216,37 @@ class PrivatePostApiTests(TestCase):
         res = self.client.patch(url, _payload)
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_delete_post_success(self):
+        """Testa uma requisição com sucesso para a rota delete."""
+        _post = create_post(
+            user=self.user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+
+        url = delete_url(_post.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Post.objects.filter(id=_post.id).exists())
+
+    def test_delete_post_with_other_user(self):
+        """Testa o delete permitido apenas para o usuário atrelado ao Post."""
+        _user = create_user(
+            email='user2@test.com',
+            password='pass123'
+        )
+        _post = create_post(
+            user=_user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+
+        url = delete_url(_post.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertTrue(Post.objects.filter(id=_post.id).exists())

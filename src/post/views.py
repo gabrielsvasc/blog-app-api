@@ -48,6 +48,24 @@ class PostPrivateViewSet(
 
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
+    def delete_post(self, request: Request, pk: int = None):
+        """
+            Recebe o ID do Post que será deletado e retorna um status conforme condições:
+                204 - Objeto deletado com sucesso.
+                404 - Objeto não existe no banco de dados.
+                401 - Usuário da requisição não tem permissão.
+        """
+        _post = get_object_or_404(self.queryset, pk=pk)
+        serializer = self.serializer_class(
+            instance=_post
+        )
+
+        if serializer.is_valid_user(_post, request):
+            _post.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
 
 class PostPublicViewSet(viewsets.ViewSet):
     """View para as rotas públicas do Post."""
