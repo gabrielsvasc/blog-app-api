@@ -6,7 +6,7 @@ from core.models import Post
 
 
 class PostSerializer(serializers.ModelSerializer):
-    """Serializer para a rota de Posts."""
+    """Serializer para a tabela de Posts."""
     class Meta:
         model = Post
         fields = ['id', 'title', 'desc_post', 'datetime']
