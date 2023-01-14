@@ -21,9 +21,9 @@ class PostPrivateViewSet(
 
     def publish(self, request: Request) -> Response:
         """
-            Recebe os dados do Post que será criado e retorna um status conforme condições:
-                201 - Objeto criado com sucesso.
-                400 - Dados passados não são válidos.
+            Recebe os dados do Post que será criado e retorna um status conforme condições: \n
+                201 - Objeto criado com sucesso. \n
+                400 - Dados passados não são válidos. \n
         """
         serializer = self.serializer_class(data=request.data)
 
@@ -36,10 +36,10 @@ class PostPrivateViewSet(
 
     def update_post(self, request: Request, pk: int = None):
         """
-            Recebe os dados do Post que será atualizado e retorna um status conforme condições:
-                200 - Objeto atualizado com sucesso.
-                401 - Usuário da requisição não tem permissão atualizar esse objeto.
-                400 - Dados passados não são válidos.
+            Recebe os dados do Post que será atualizado e retorna um status conforme condições: \n
+                200 - Objeto atualizado com sucesso. \n
+                400 - Dados passados não são válidos. \n
+                401 - Usuário da requisição não tem permissão para atualizar esse objeto. \n
         """
         _post = get_object_or_404(self.queryset, pk=pk)
         serializer = self.serializer_class(
@@ -57,10 +57,10 @@ class PostPrivateViewSet(
 
     def delete_post(self, request: Request, pk: int = None):
         """
-            Recebe o ID do Post que será deletado e retorna um status conforme condições:
-                204 - Objeto deletado com sucesso.
-                404 - Objeto não existe no banco de dados.
-                401 - Usuário da requisição não tem permissão deletar esse objeto.
+            Recebe o ID do Post que será deletado e retorna um status conforme condições: \n
+                204 - Objeto deletado com sucesso. \n
+                401 - Usuário da requisição não tem permissão para deletar esse objeto. \n
+                404 - Objeto não existe no banco de dados. \n
         """
         _post = get_object_or_404(self.queryset, pk=pk)
         serializer = self.serializer_class(

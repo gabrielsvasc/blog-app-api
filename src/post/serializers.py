@@ -19,6 +19,9 @@ class PostDetailSerializer(PostSerializer):
         fields = PostSerializer.Meta.fields + ['post']
 
     def is_valid_user(self, instance: Post, request: Request) -> bool:
+        """Valida se o usuário da requisição é o mesmo do objeto:
+        Se forem iguais retorna True.
+        Se forem diferente retorna False."""
         serializer_user = instance.user
         request_user = request.user
 

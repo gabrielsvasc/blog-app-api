@@ -62,3 +62,15 @@ class Post(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+
+class Tag(models.Model):
+    """Model para Posts da API."""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    tag = models.CharField(max_length=40, primary_key=True)
+
+    def __str__(self) -> str:
+        return self.tag
