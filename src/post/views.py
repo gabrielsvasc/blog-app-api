@@ -20,8 +20,11 @@ class PostPrivateViewSet(
     permission_classes = [IsAuthenticated]
 
     def publish(self, request: Request) -> Response:
-        """Recebe os valores para criação de um Post, se forem validos retorna HTTP 201
-        e se não retorna HTTP 400."""
+        """
+            Recebe os dados do Post que será criado e retorna um status conforme condições:
+                201 - Objeto criado com sucesso.
+                400 - Dados passados não são válidos.
+        """
         serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
@@ -32,8 +35,12 @@ class PostPrivateViewSet(
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
     def update_post(self, request: Request, pk: int = None):
-        """Recebe os valores para atualização do Post, se forem validos retorna HTTP 201
-        e se não retorna HTTP 400."""
+        """
+            Recebe os dados do Post que será atualizado e retorna um status conforme condições:
+                200 - Objeto atualizado com sucesso.
+                401 - Usuário da requisição não tem permissão atualizar esse objeto.
+                400 - Dados passados não são válidos.
+        """
         _post = get_object_or_404(self.queryset, pk=pk)
         serializer = self.serializer_class(
             instance=_post, data=request.data, partial=True)
@@ -53,7 +60,7 @@ class PostPrivateViewSet(
             Recebe o ID do Post que será deletado e retorna um status conforme condições:
                 204 - Objeto deletado com sucesso.
                 404 - Objeto não existe no banco de dados.
-                401 - Usuário da requisição não tem permissão.
+                401 - Usuário da requisição não tem permissão deletar esse objeto.
         """
         _post = get_object_or_404(self.queryset, pk=pk)
         serializer = self.serializer_class(
@@ -81,14 +88,14 @@ class PostPublicViewSet(viewsets.ViewSet):
             return PostDetailSerializer
 
     def list(self, request: Request) -> Response:
-        """Retorna uma lista com todos os Posts resumidos."""
+        """Retorna todos os Posts de forma resumida."""
         _get_serializer = self.get_serializer_class()
         serializer: PostSerializer = _get_serializer(self.queryset, many=True)
 
         return Response(serializer.data)
 
     def retrieve(self, request: Request, pk: int = None) -> Response:
-        """Retorna um Post específico."""
+        """Retorna apenas um Post com todas as informações ."""
         _get_serializer = self.get_serializer_class()
         _post = get_object_or_404(self.queryset, pk=pk)
         serializer: PostDetailSerializer = _get_serializer(_post)
