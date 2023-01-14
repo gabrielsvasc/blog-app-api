@@ -80,7 +80,7 @@ class PublicPostApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
 
-    def test_get_post_detail(self):
+    def test_get_post_detail_success(self):
         """Testa o retorno com os detalhes do Post desejado."""
         _post = create_post(
             user=self.user,
@@ -94,6 +94,20 @@ class PublicPostApiTests(TestCase):
 
         serializer = PostDetailSerializer(_post)
         self.assertEqual(res.data, serializer.data)
+
+    def test_get_post_detail_return_404(self):
+        """Testa o retorno do status code 404 quando o post informado não existe."""
+        _post = create_post(
+            user=self.user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+
+        url = detail_url(_post.id+1)
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_post_method_auth_required(self):
         """Testa a necessidade de autenticação no método POST."""
@@ -196,6 +210,23 @@ class PrivatePostApiTests(TestCase):
 
         self.assertEqual(_post.title, _payload['title'])
 
+    def test_patch_post_return_404(self):
+        """Testa o retorno do status code 404 quando o post informado não existe."""
+        _post = create_post(
+            user=self.user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+        _payload = {
+            'title': 'Test Title Fail'
+        }
+
+        url = patch_url(_post.id+1)
+        res = self.client.patch(url, _payload)
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_patch_post_with_other_user(self):
         """Testa o update permitido apenas para o usuário atrelado ao Post."""
         _user = create_user(
@@ -231,6 +262,20 @@ class PrivatePostApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Post.objects.filter(id=_post.id).exists())
+
+    def test_delete_post_return_404(self):
+        """Testa o retorno do status code 404 quando o post informado não existe."""
+        _post = create_post(
+            user=self.user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+
+        url = delete_url(_post.id+1)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_post_with_other_user(self):
         """Testa o delete permitido apenas para o usuário atrelado ao Post."""

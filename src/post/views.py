@@ -40,6 +40,7 @@ class PostPrivateViewSet(
                 200 - Objeto atualizado com sucesso. \n
                 400 - Dados passados não são válidos. \n
                 401 - Usuário da requisição não tem permissão para atualizar esse objeto. \n
+                404 - Objeto não existe no banco de dados. \n
         """
         _post = get_object_or_404(self.queryset, pk=pk)
         serializer = self.serializer_class(
@@ -88,14 +89,18 @@ class PostPublicViewSet(viewsets.ViewSet):
             return PostDetailSerializer
 
     def list(self, request: Request) -> Response:
-        """Retorna todos os Posts de forma resumida."""
+        """Retorna uma lista com todos os Posts resumidos."""
         _get_serializer = self.get_serializer_class()
         serializer: PostSerializer = _get_serializer(self.queryset, many=True)
 
         return Response(serializer.data)
 
     def retrieve(self, request: Request, pk: int = None) -> Response:
-        """Retorna apenas um Post com todas as informações ."""
+        """
+            Retorna um post detalhado se o objeto informado existir: \n
+                204 - Objeto retornado com sucesso. \n
+                404 - Objeto não existe no banco de dados. \n
+        """
         _get_serializer = self.get_serializer_class()
         _post = get_object_or_404(self.queryset, pk=pk)
         serializer: PostDetailSerializer = _get_serializer(_post)
