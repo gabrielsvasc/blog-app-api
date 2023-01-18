@@ -5,12 +5,29 @@ from rest_framework.routers import DefaultRouter, Route
 
 from tag import views
 
-router_public = DefaultRouter(trailing_slash=False)
+
+class TagPrivateRouter(DefaultRouter):
+    """Router utilizado para o mapeamento das rotas privadas."""
+    routes = [
+        Route(
+            url=r'^{prefix}/create/$',
+            mapping={'post': 'create'},
+            name='{basename}-create',
+            detail=False,
+            initkwargs={}
+        ),
+    ]
+
+
+router_public = DefaultRouter()
+router_private = TagPrivateRouter()
 
 router_public.register('', views.TagPublicViewSet, basename='public')
+router_private.register('', views.TagPrivateViewSet, basename='private')
 
 app_name = 'tag'
 
 urlpatterns = [
     path('', include(router_public.urls)),
+    path('', include(router_private.urls)),
 ]

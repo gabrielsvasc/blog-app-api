@@ -10,6 +10,7 @@ from core.models import Tag
 from tag.serializers import TagSerializer
 
 TAG_PUBLIC_URL = reverse('tag:public-list')
+TAG_CREATE_URL = reverse('tag:private-create')
 
 
 def create_user(email='user@example.com', password='testpass123'):
@@ -53,3 +54,47 @@ class PublicTagApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
+
+    def test_post_method_auth_required(self):
+        """Testa a necessidade de autenticação no método POST."""
+        _payload = {
+            'user':  self.user,
+            'tag': 'Filmes'
+        }
+
+        res = self.client.post(TAG_CREATE_URL, _payload)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class PrivateTagApiTests(TestCase):
+    """Testes de requisições autenticadas."""
+
+    def setUp(self):
+        self.user = create_user()
+        self.client = APIClient()
+        self.client.force_authenticate(self.user)
+
+    def test_tag_create_success(self):
+        """Testa uma requisição com sucesso para a rota create."""
+        _payload = {
+            'user':  self.user,
+            'tag': 'Filmes'
+        }
+
+        res = self.client.post(TAG_CREATE_URL, _payload)
+        _tag = Tag.objects.get(tag=res.data['tag'])
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Tag.objects.filter(tag=res.data['tag']).exists())
+        self.assertEqual(_tag.user, self.user)
+
+    def test_tag_create_unvalidated_data(self):
+        """Testa uma requisição para a rota create com dados inválidos."""
+        _payload = {
+            'user':  self.user,
+        }
+
+        res = self.client.post(TAG_CREATE_URL, _payload)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
