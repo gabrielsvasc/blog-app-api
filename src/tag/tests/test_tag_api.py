@@ -34,6 +34,11 @@ def delete_url(tag: str):
     return reverse('tag:private-delete', args=[tag])
 
 
+def put_url(tag: str):
+    """Retorna a rota de update da Tag."""
+    return reverse('tag:private-update', args=[tag])
+
+
 class PublicTagApiTests(TestCase):
     """Testes de requisições não autenticadas."""
 
@@ -81,6 +86,21 @@ class PublicTagApiTests(TestCase):
         url = delete_url(_tag.tag)
 
         res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_put_method_auth_required(self):
+        """Testa a necessidade de autenticação no método PUT."""
+        _tag = create_tag(
+            user=self.user,
+            tag='tag'
+        )
+        _payload = {
+            'tag': 'test'
+        }
+
+        url = put_url(_tag.tag)
+        res = self.client.put(url, _payload)
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -153,3 +173,49 @@ class PrivateTagApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertTrue(Tag.objects.filter(tag=_tag.tag).exists())
+
+    def test_update_tag_success(self):
+        """Testa uma requisição com sucesso para a rota update."""
+        _tag = create_tag(
+            user=self.user,
+            tag='tag'
+        )
+        _payload = {
+            'tag': 'test'
+        }
+
+        url = put_url(_tag.tag)
+        res = self.client.put(url, _payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertTrue(Tag.objects.filter(tag=_payload['tag']).exists())
+
+    def test_patch_post_return_404(self):
+        """Testa o retorno do status code 404 quando a Tag informada não existe."""
+        _payload = {
+            'tag': 'test'
+        }
+
+        url = put_url('WRONG')
+        res = self.client.put(url, _payload)
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_patch_post_with_other_user(self):
+        """Testa o update permitido apenas para o usuário atrelado a Tag."""
+        _user = create_user(
+            email='user2@test.com',
+            password='pass123'
+        )
+        _tag = create_tag(
+            user=_user,
+            tag='tag'
+        )
+        _payload = {
+            'tag': 'test'
+        }
+
+        url = put_url(_tag.tag)
+        res = self.client.put(url, _payload)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)

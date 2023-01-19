@@ -23,6 +23,13 @@ class TagPrivateRouter(DefaultRouter):
             detail=True,
             initkwargs={}
         ),
+        Route(
+            url=r'^{prefix}/update/{lookup}$',
+            mapping={'put': 'update'},
+            name='{basename}-update',
+            detail=True,
+            initkwargs={}
+        ),
     ]
 
 

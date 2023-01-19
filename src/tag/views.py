@@ -51,7 +51,7 @@ class TagPrivateViewSet(viewsets.ViewSet):
 
     def delete(self, request: Request, pk: str = None):
         """
-            Recebe o ID da Tag que será deletado e retorna um status conforme condições: \n
+            Recebe a Tag que será deletada e retorna um status conforme condições: \n
                 204 - Objeto deletado com sucesso. \n
                 401 - Usuário da requisição não tem permissão para deletar esse objeto. \n
                 404 - Objeto não existe no banco de dados. \n
@@ -65,3 +65,25 @@ class TagPrivateViewSet(viewsets.ViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         return Response(serializer.data, status.HTTP_401_UNAUTHORIZED)
+
+    def update(self, request: Request, pk: str = None):
+        """
+            Recebe a Tag que será atualizada e retorna um status conforme condições: \n
+                200 - Objeto atualizado com sucesso. \n
+                400 - Dados da requisição não são validos. \n
+                401 - Usuário da requisição não tem permissão para deletar esse objeto. \n
+                404 - Objeto não existe no banco de dados. \n
+        """
+        _tag = get_object_or_404(self.queryset, pk=pk)
+        serializer = self.serializer_class(
+            instance=_tag, data=request.data, partial=False)
+
+        if serializer.is_valid():
+            if serializer.is_valid_user(_tag, request):
+                serializer.update(_tag, request.data)
+
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            return Response(serializer.data, status.HTTP_401_UNAUTHORIZED)
+
+        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
