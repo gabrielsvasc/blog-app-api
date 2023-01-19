@@ -16,6 +16,13 @@ class TagPrivateRouter(DefaultRouter):
             detail=False,
             initkwargs={}
         ),
+        Route(
+            url=r'^{prefix}/delete/{lookup}$',
+            mapping={'delete': 'delete'},
+            name='{basename}-delete',
+            detail=True,
+            initkwargs={}
+        ),
     ]
 
 

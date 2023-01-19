@@ -29,6 +29,11 @@ def create_tag(user, tag) -> Tag:
     return tag
 
 
+def delete_url(tag: str):
+    """Retorna a rota de delete da Tag."""
+    return reverse('tag:private-delete', args=[tag])
+
+
 class PublicTagApiTests(TestCase):
     """Testes de requisições não autenticadas."""
 
@@ -66,6 +71,19 @@ class PublicTagApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_delete_method_auth_required(self):
+        """Testa a necessidade de autenticação no método DELETE."""
+        _tag = create_tag(
+            user=self.user,
+            tag='tag'
+        )
+
+        url = delete_url(_tag.tag)
+
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 class PrivateTagApiTests(TestCase):
     """Testes de requisições autenticadas."""
@@ -98,3 +116,40 @@ class PrivateTagApiTests(TestCase):
         res = self.client.post(TAG_CREATE_URL, _payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_delete_tag_success(self):
+        """Testa uma requisição com sucesso para a rota delete."""
+        _tag = create_tag(
+            user=self.user,
+            tag='tag'
+        )
+
+        url = delete_url(_tag.tag)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Tag.objects.filter(tag=_tag.tag).exists())
+
+    def test_delete_tag_return_404(self):
+        """Testa o retorno do status code 404 quando o post informado não existe."""
+        url = delete_url('NExiste')
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_tag_with_other_user(self):
+        """Testa o delete permitido apenas para o usuário atrelado ao Post."""
+        _user = create_user(
+            email='user2@test.com',
+            password='pass123'
+        )
+        _tag = create_tag(
+            user=_user,
+            tag='tag'
+        )
+
+        url = delete_url(_tag.tag)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertTrue(Tag.objects.filter(tag=_tag.tag).exists())
