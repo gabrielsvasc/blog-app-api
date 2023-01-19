@@ -14,6 +14,16 @@ def create_user(email, password):
     return get_user_model().objects.create_user(email, password)
 
 
+def create_post(user, title, desc_post, post):
+    """Cria e retorna um novo usuário."""
+    return models.Post.objects.create(
+        user=user,
+        title=title,
+        desc_post=desc_post,
+        post=post
+    )
+
+
 class ModelTests(TestCase):
     """Teste dos models"""
 
@@ -87,3 +97,24 @@ class ModelTests(TestCase):
         )
 
         self.assertEqual(str(_tag), _tag.tag)
+
+    def test_create_comment(self):
+        """Testa a criação de um comentário com sucesso no banco de dados."""
+        _user = create_user(
+            'test@example.com',
+            'testpass123',
+        )
+        _post = create_post(
+            _user,
+            'test',
+            'test desc',
+            'post test'
+        )
+        _comment = models.Comment.objects.create(
+            user=_user,
+            post=_post,
+            comment='Teste Comment',
+            reply_to=1,
+        )
+
+        self.assertEqual(str(_comment), _comment.comment)

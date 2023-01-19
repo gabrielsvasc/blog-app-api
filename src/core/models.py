@@ -74,3 +74,19 @@ class Tag(models.Model):
 
     def __str__(self) -> str:
         return self.tag
+
+
+class Comment(models.Model):
+    """Model para Comentários da API."""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    post = models.ForeignKey(Post,
+                             on_delete=models.CASCADE,
+                             )
+    comment = models.TextField()
+    reply_to = models.BigIntegerField(default=None)
+
+    def __str__(self) -> str:
+        return self.comment
