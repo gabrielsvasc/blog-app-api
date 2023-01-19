@@ -33,4 +33,5 @@ urlpatterns = [
     path('user/', include('user.urls')),
     path('post/', include('post.urls')),
     path('tag/', include('tag.urls')),
+    path('comment/', include('comment.urls')),
 ]

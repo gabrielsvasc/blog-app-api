@@ -86,7 +86,7 @@ class Comment(models.Model):
                              on_delete=models.CASCADE,
                              )
     comment = models.TextField()
-    reply_to = models.BigIntegerField(default=None)
+    reply_to = models.BigIntegerField(null=True)
 
     def __str__(self) -> str:
         return self.comment

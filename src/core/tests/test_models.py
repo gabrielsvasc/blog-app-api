@@ -1,10 +1,7 @@
-"""Teste para os Models da API."""
+"""Testes para os Models da API."""
 
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-
-from unittest.mock import patch
-from decimal import Decimal
 
 from core import models
 
