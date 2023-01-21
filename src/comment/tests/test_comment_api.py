@@ -11,7 +11,7 @@ from comment.serializers import (
     CommentSerializer
 )
 
-COMMENT_PUBLIC_URL = reverse('comment:public-list')
+COMMENT_PUBLIC_URL = reverse('comment:comment-list')
 
 
 def create_user(email='user@example.com', password='testpass123'):
@@ -79,7 +79,7 @@ class PublicPostApiTests(TestCase):
         self.assertEqual(res.data, serializer.data)
 
     def test_retrieve_comments(self):
-        """Testa o retorno com os Comentários apenas ao post."""
+        """Testa o retorno dos Comentários."""
         _post = create_post(
             user=self.user,
             title='title 1',
@@ -104,3 +104,34 @@ class PublicPostApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
+
+    def test_retrieve_comments_from_all_users(self):
+        """Testa o retorno dos Comentários indepentente do usuário."""
+        _post = create_post(
+            user=self.user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+        _user = create_user(
+            email='teste@mail.com',
+            password='gfdsgfs'
+        )
+        create_comment(
+            user=self.user,
+            post=_post,
+            comment='comments 1'
+        )
+        create_comment(
+            user=_user,
+            post=_post,
+            comment='comments 2'
+        )
+
+        res = self.client.get(COMMENT_PUBLIC_URL)
+
+        comments = Comment.objects.all().order_by('-id')
+        serializer = CommentSerializer(comments, many=True)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data), len(serializer.data))

@@ -8,7 +8,7 @@ from comment import views
 
 router_public = DefaultRouter()
 
-router_public.register('', views.CommentPublicViewSet, basename='public')
+router_public.register('', views.CommentViewSet)
 
 app_name = 'comment'
 

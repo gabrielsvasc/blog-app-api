@@ -11,12 +11,21 @@ from core.models import Comment
 from comment.serializers import CommentSerializer
 
 
-class CommentPublicViewSet(viewsets.ViewSet):
+class CommentViewSet(viewsets.ViewSet):
     """View para as rotas públicas do Comment."""
     queryset = Comment.objects.all().order_by('-id')
     serializer_class = CommentSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [AllowAny]
+
+    def get_permissions(self):
+        """Define as permissões utilizadas nas rotas."""
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+
+        return [permission() for permission in permission_classes]
 
     def list(self, request: Request) -> Response:
         """Retorna uma lista com todos os comentários criados."""
@@ -24,4 +33,5 @@ class CommentPublicViewSet(viewsets.ViewSet):
             instance=self.queryset,
             many=True
         )
+
         return Response(serializer.data)
