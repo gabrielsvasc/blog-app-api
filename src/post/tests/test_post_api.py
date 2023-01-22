@@ -13,8 +13,8 @@ from post.serializers import (
 )
 
 
-POST_PUBLIC_URL = reverse('post:public-list')
-POST_CREATE_URL = reverse('post:private-publish')
+POST_LIST_URL = reverse('post:post-list')
+POST_CREATE_URL = reverse('post:post-publish')
 
 
 def create_user(email='user@example.com', password='testpass123'):
@@ -25,17 +25,17 @@ def create_user(email='user@example.com', password='testpass123'):
 
 def detail_url(post_id):
     """Retorna os detalhes de um Post."""
-    return reverse('post:public-detail', args=[post_id])
+    return reverse('post:post-retrieve', args=[post_id])
 
 
 def patch_url(post_id):
     """Retorna a rota patch de um Post."""
-    return reverse('post:private-update', args=[post_id])
+    return reverse('post:post-update', args=[post_id])
 
 
 def delete_url(post_id):
     """Retorna a rota patch de um Post."""
-    return reverse('post:private-delete', args=[post_id])
+    return reverse('post:post-delete', args=[post_id])
 
 
 def create_post(user, title, desc_post, post) -> Post:
@@ -72,7 +72,7 @@ class PublicPostApiTests(TestCase):
             post='post 2',
         )
 
-        res = self.client.get(POST_PUBLIC_URL)
+        res = self.client.get(POST_LIST_URL)
 
         posts = Post.objects.all().order_by('-id')
         serializer = PostSerializer(posts, many=True)

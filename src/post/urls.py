@@ -7,9 +7,23 @@ from rest_framework.routers import DefaultRouter, Route
 from post import views
 
 
-class PostPrivateRouter(DefaultRouter):
+class PostRouter(DefaultRouter):
     """Router utilizado para o mapeamento das rotas privadas."""
     routes = [
+        Route(
+            url=r'^{prefix}/$',
+            mapping={'get': 'list'},
+            name='{basename}-list',
+            detail=False,
+            initkwargs={}
+        ),
+        Route(
+            url=r'^{prefix}/{lookup}$',
+            mapping={'get': 'retrieve'},
+            name='{basename}-retrieve',
+            detail=True,
+            initkwargs={}
+        ),
         Route(
             url=r'^{prefix}/publish/$',
             mapping={'post': 'publish'},
@@ -34,15 +48,12 @@ class PostPrivateRouter(DefaultRouter):
     ]
 
 
-router_public = DefaultRouter(trailing_slash=False)
-router_private = PostPrivateRouter()
+router = PostRouter()
 
-router_public.register('', views.PostPublicViewSet, basename='public')
-router_private.register('', views.PostPrivateViewSet, basename='private')
+router.register('', views.PostViewSet, basename='post')
 
 app_name = 'post'
 
 urlpatterns = [
-    path('', include(router_public.urls)),
-    path('', include(router_private.urls)),
+    path('', include(router.urls)),
 ]

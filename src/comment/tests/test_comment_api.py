@@ -11,7 +11,7 @@ from comment.serializers import (
     CommentSerializer
 )
 
-COMMENT_PUBLIC_URL = reverse('comment:comment-list')
+COMMENT_LIST_URL = reverse('comment:comment-list')
 
 
 def create_user(email='user@example.com', password='testpass123'):
@@ -70,7 +70,7 @@ class PublicPostApiTests(TestCase):
             comment='comments 2'
         )
 
-        res = self.client.get(COMMENT_PUBLIC_URL)
+        res = self.client.get(COMMENT_LIST_URL)
 
         comments = Comment.objects.all().order_by('-id')
         serializer = CommentSerializer(comments, many=True)
@@ -97,7 +97,7 @@ class PublicPostApiTests(TestCase):
             comment='comments 2'
         )
 
-        res = self.client.get(COMMENT_PUBLIC_URL)
+        res = self.client.get(COMMENT_LIST_URL)
 
         comments = Comment.objects.all().order_by('-id')
         serializer = CommentSerializer(comments, many=True)
@@ -128,7 +128,7 @@ class PublicPostApiTests(TestCase):
             comment='comments 2'
         )
 
-        res = self.client.get(COMMENT_PUBLIC_URL)
+        res = self.client.get(COMMENT_LIST_URL)
 
         comments = Comment.objects.all().order_by('-id')
         serializer = CommentSerializer(comments, many=True)

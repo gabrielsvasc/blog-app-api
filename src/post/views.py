@@ -11,13 +11,50 @@ from core.models import Post
 from post.serializers import PostSerializer, PostDetailSerializer
 
 
-class PostPrivateViewSet(
+class PostViewSet(
         viewsets.ViewSet):
     """View para as rotas privadas do Post."""
     serializer_class = PostDetailSerializer
     queryset = Post.objects.all().order_by('-id')
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        """Define as permissões utilizadas nas rotas."""
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+
+        return [permission() for permission in permission_classes]
+
+    def get_serializer_class(self) -> PostSerializer | PostDetailSerializer:
+        """Define o Serializer usado em cada método."""
+        if self.action == 'list':
+            return PostSerializer
+        else:
+            return self.serializer_class
+
+    def list(self, request: Request) -> Response:
+        """
+            Retorna uma lista com todos os Posts resumidos.
+                200 - Objeto retornado com sucesso. \n
+        """
+        _get_serializer = self.get_serializer_class()
+        serializer: PostSerializer = _get_serializer(self.queryset, many=True)
+
+        return Response(serializer.data)
+
+    def retrieve(self, request: Request, pk: int = None) -> Response:
+        """
+            Retorna um post detalhado se o objeto informado existir: \n
+                200 - Objeto retornado com sucesso. \n
+                404 - Objeto não existe no banco de dados. \n
+        """
+        _get_serializer = self.get_serializer_class()
+        _post = get_object_or_404(self.queryset, pk=pk)
+        serializer: PostDetailSerializer = _get_serializer(_post)
+
+        return Response(serializer.data)
 
     def publish(self, request: Request) -> Response:
         """
@@ -73,36 +110,3 @@ class PostPrivateViewSet(
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         return Response(status=status.HTTP_401_UNAUTHORIZED)
-
-
-class PostPublicViewSet(viewsets.ViewSet):
-    """View para as rotas públicas do Post."""
-    queryset = Post.objects.all().order_by('-id')
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [AllowAny]
-
-    def get_serializer_class(self) -> PostSerializer | PostDetailSerializer:
-        """Define o Serializer usado em cada método."""
-        if self.action == 'list':
-            return PostSerializer
-        else:
-            return PostDetailSerializer
-
-    def list(self, request: Request) -> Response:
-        """Retorna uma lista com todos os Posts resumidos."""
-        _get_serializer = self.get_serializer_class()
-        serializer: PostSerializer = _get_serializer(self.queryset, many=True)
-
-        return Response(serializer.data)
-
-    def retrieve(self, request: Request, pk: int = None) -> Response:
-        """
-            Retorna um post detalhado se o objeto informado existir: \n
-                204 - Objeto retornado com sucesso. \n
-                404 - Objeto não existe no banco de dados. \n
-        """
-        _get_serializer = self.get_serializer_class()
-        _post = get_object_or_404(self.queryset, pk=pk)
-        serializer: PostDetailSerializer = _get_serializer(_post)
-
-        return Response(serializer.data)
