@@ -9,8 +9,8 @@ from rest_framework.test import APIClient
 from core.models import Tag
 from tag.serializers import TagSerializer
 
-TAG_PUBLIC_URL = reverse('tag:public-list')
-TAG_CREATE_URL = reverse('tag:private-create')
+TAG_LIST_URL = reverse('tag:tag-list')
+TAG_CREATE_URL = reverse('tag:tag-create')
 
 
 def create_user(email='user@example.com', password='testpass123'):
@@ -31,12 +31,12 @@ def create_tag(user, tag) -> Tag:
 
 def delete_url(tag: str):
     """Retorna a rota de delete da Tag."""
-    return reverse('tag:private-delete', args=[tag])
+    return reverse('tag:tag-delete', args=[tag])
 
 
 def put_url(tag: str):
     """Retorna a rota de update da Tag."""
-    return reverse('tag:private-update', args=[tag])
+    return reverse('tag:tag-update', args=[tag])
 
 
 class PublicTagApiTests(TestCase):
@@ -57,7 +57,7 @@ class PublicTagApiTests(TestCase):
             tag='Esportes'
         )
 
-        res = self.client.get(TAG_PUBLIC_URL)
+        res = self.client.get(TAG_LIST_URL)
 
         tags = Tag.objects.all().order_by('-tag')
         serializer = TagSerializer(tags, many=True)

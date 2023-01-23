@@ -11,13 +11,21 @@ from core.models import Tag
 from tag.serializers import TagSerializer
 
 
-class TagPublicViewSet(viewsets.ViewSet):
+class TagViewSet(viewsets.ViewSet):
     """View usada para listar as Tags."""
 
     queryset = Tag.objects.all().order_by('-tag')
     serializer_class = TagSerializer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [AllowAny]
+
+    def get_permissions(self):
+        """Define as permissões utilizadas nas rotas."""
+        if self.action in ['list']:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+
+        return [permission() for permission in permission_classes]
 
     def list(self, request: Request) -> Response:
         """Retorna uma lista com todas as Tags criadas."""
@@ -25,14 +33,6 @@ class TagPublicViewSet(viewsets.ViewSet):
             self.queryset, many=True)
 
         return Response(serializer.data)
-
-
-class TagPrivateViewSet(viewsets.ViewSet):
-    """View usada para todos os métodos privados."""
-    queryset = Tag.objects.all().order_by('-tag')
-    serializer_class = TagSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
 
     def create(self, request: Request) -> Response:
         """
