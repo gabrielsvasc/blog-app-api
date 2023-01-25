@@ -2,7 +2,7 @@ from rest_framework.routers import DefaultRouter, Route
 
 
 class TagRouter(DefaultRouter):
-    """Router utilizado para o mapeamento das rotas privadas."""
+    """Router utilizado para o mapeamento das rotas."""
     routes = [
         Route(
             url=r'^{prefix}/$',
@@ -24,12 +24,5 @@ class TagRouter(DefaultRouter):
             name='{basename}-delete',
             detail=True,
             initkwargs={}
-        ),
-        Route(
-            url=r'^{prefix}/update/{lookup}$',
-            mapping={'put': 'update'},
-            name='{basename}-update',
-            detail=True,
-            initkwargs={}
-        ),
+        )
     ]

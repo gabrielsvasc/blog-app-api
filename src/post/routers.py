@@ -2,7 +2,7 @@ from rest_framework.routers import DefaultRouter, Route
 
 
 class PostRouter(DefaultRouter):
-    """Router utilizado para o mapeamento das rotas privadas."""
+    """Router utilizado para o mapeamento das rotas."""
     routes = [
         Route(
             url=r'^{prefix}/$',
