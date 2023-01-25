@@ -19,9 +19,16 @@ class CommentRouter(DefaultRouter):
             initkwargs={}
         ),
         Route(
-            url=r'^{prefix}/create/{lookup}$',
+            url=r'^{prefix}/update/{lookup}$',
             mapping={'patch': 'update'},
             name='{basename}-update',
+            detail=True,
+            initkwargs={}
+        ),
+        Route(
+            url=r'^{prefix}/delete/{lookup}$',
+            mapping={'delete': 'delete'},
+            name='{basename}-delete',
             detail=True,
             initkwargs={}
         ),

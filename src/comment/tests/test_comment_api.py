@@ -15,9 +15,14 @@ COMMENT_LIST_URL = reverse('comment:comment-list')
 COMMENT_CREATE_URL = reverse('comment:comment-create')
 
 
-def patch_url(comment_id):
+def patch_url(comment_id: int):
     """Retorna a rota patch de um comentário."""
     return reverse('comment:comment-update', args=[comment_id])
+
+
+def delete_url(comment_id: int):
+    """Retorna a rota patch de um comentário."""
+    return reverse('comment:comment-delete', args=[comment_id])
 
 
 def create_user(email='user@example.com', password='testpass123'):
@@ -187,6 +192,25 @@ class PublicCommentApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_comment_delete_method_auth_required(self):
+        """Testa a necessidade de autenticação no método DELETE."""
+        _post = create_post(
+            user=self.user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+        _comment = create_comment(
+            user=self.user,
+            post=_post,
+            comment='test'
+        )
+
+        url = delete_url(_comment.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 class PrivateCommentApiTests(TestCase):
     """Testes de requisições não autenticadas."""
@@ -324,3 +348,66 @@ class PrivateCommentApiTests(TestCase):
         res = self.client.patch(url, _payload)
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_delete_comment_success(self):
+        """Testa uma requisição com sucesso no método DELETE."""
+        _post = create_post(
+            user=self.user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+        _comment = create_comment(
+            user=self.user,
+            post=_post,
+            comment='test'
+        )
+
+        url = delete_url(_comment.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Comment.objects.filter(id=_comment.id).exists())
+
+    def test_delete_comment_return_404(self):
+        """Testa o retorno do status code 404 quando o comentário informado não existe."""
+        _post = create_post(
+            user=self.user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+        _comment = create_comment(
+            user=self.user,
+            post=_post,
+            comment='test'
+        )
+
+        url = delete_url(_comment.id+1)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_comment_with_other_user(self):
+        """Testa o delete permitido apenas para o usuário atrelado ao comentário."""
+        _user = create_user(
+            email='user2@test.com',
+            password='pass123'
+        )
+        _post = create_post(
+            user=self.user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+        _comment = create_comment(
+            user=_user,
+            post=_post,
+            comment='test'
+        )
+
+        url = delete_url(_comment.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertTrue(Comment.objects.filter(id=_comment.id).exists())

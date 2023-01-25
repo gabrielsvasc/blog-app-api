@@ -78,3 +78,22 @@ class CommentViewSet(viewsets.ViewSet):
             return Response(serializer.data, status.HTTP_401_UNAUTHORIZED)
 
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request: Request, pk: int = None):
+        """
+            Recebe o ID do comentário que será deletado e retorna um status conforme condições: \n
+                204 - Objeto deletado com sucesso. \n
+                401 - Usuário da requisição não tem permissão para deletar esse objeto. \n
+                404 - Objeto não existe no banco de dados. \n
+        """
+        _comment = get_object_or_404(self.queryset, pk=pk)
+        serializer = self.serializer_class(
+            instance=_comment
+        )
+
+        if self.validate.is_valid_user(_comment.user, request.user):
+            _comment.delete()
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response(serializer.data, status=status.HTTP_401_UNAUTHORIZED)
