@@ -202,27 +202,27 @@ class PrivateCommentApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
-    # def test_post_comment_reply_to_unexistent_comment(self):
-    #     """
-    #     Testa comentário com reply_to inválido.
-    #     """
-    #     _post = create_post(
-    #         user=self.user,
-    #         title='title 1',
-    #         desc_post='desc 1',
-    #         post='post 1',
-    #     )
-    #     _comment = create_comment(
-    #         user=self.user,
-    #         post=_post,
-    #         comment='test'
-    #     )
-    #     _payload = {
-    #         'post': _post.id,
-    #         'comment': 'comments 1',
-    #         'reply_to': _comment.id + 1
-    #     }
+    def test_post_comment_reply_to_unexistent_comment(self):
+        """
+        Testa comentário com reply_to inválido.
+        """
+        _post = create_post(
+            user=self.user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+        _comment = create_comment(
+            user=self.user,
+            post=_post,
+            comment='test'
+        )
+        _payload = {
+            'post': _post.id,
+            'comment': 'comments 1',
+            'reply_to': _comment.id + 1
+        }
 
-    #     res = self.client.post(COMMENT_CREATE_URL, _payload)
+        res = self.client.post(COMMENT_CREATE_URL, _payload)
 
-    #     self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
