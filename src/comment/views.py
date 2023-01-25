@@ -20,7 +20,7 @@ class CommentViewSet(viewsets.ViewSet):
 
     def get_permissions(self):
         """Define as permissões utilizadas nas rotas."""
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list']:
             permission_classes = [AllowAny]
         else:
             permission_classes = [IsAuthenticated]
@@ -35,3 +35,21 @@ class CommentViewSet(viewsets.ViewSet):
         )
 
         return Response(serializer.data)
+
+    def create(self, request: Request):
+        """
+            Recebe os dados do Comentário que será criado
+            e retorna um status conforme condições:
+
+                201 - Objeto criado com sucesso. \n
+                400 - Dados passados não são válidos. \n
+        """
+        serializer = self.serializer_class(data=request.data)
+
+        if serializer.is_valid():
+            _user = self.serializer_class.get_user(request.user.id)
+            serializer.save(user=_user)
+
+            return Response(serializer.data, status.HTTP_201_CREATED)
+
+        return Response(serializer.data, status.HTTP_400_BAD_REQUEST)
