@@ -18,6 +18,7 @@ class CommentViewSet(viewsets.ViewSet):
     serializer_class = CommentSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [AllowAny]
+    validate = ValidateSerializer()
 
     def get_permissions(self):
         """Define as permissões utilizadas nas rotas."""
@@ -67,10 +68,9 @@ class CommentViewSet(viewsets.ViewSet):
         serializer = self.serializer_class(
             instance=_comment, data=request.data, partial=True
         )
-        validate = ValidateSerializer()
 
         if serializer.is_valid():
-            if validate.is_valid_user(_comment.user, request.user):
+            if self.validate.is_valid_user(_comment.user, request.user):
                 serializer.save()
 
                 return Response(serializer.data, status=status.HTTP_200_OK)

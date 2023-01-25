@@ -9,6 +9,7 @@ from rest_framework.request import Request
 
 from core.models import Tag
 from tag.serializers import TagSerializer
+from utils.validations import ValidateSerializer
 
 
 class TagViewSet(viewsets.ViewSet):
@@ -17,6 +18,7 @@ class TagViewSet(viewsets.ViewSet):
     queryset = Tag.objects.all().order_by('-tag')
     serializer_class = TagSerializer
     authentication_classes = [TokenAuthentication]
+    validate = ValidateSerializer()
 
     def get_permissions(self):
         """Define as permissões utilizadas nas rotas."""
@@ -60,7 +62,7 @@ class TagViewSet(viewsets.ViewSet):
         serializer = self.serializer_class(
             instance=_tag)
 
-        if serializer.is_valid_user(_tag, request):
+        if self.validate.is_valid_user(_tag.user, request.user):
             _tag.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -79,7 +81,7 @@ class TagViewSet(viewsets.ViewSet):
             instance=_tag, data=request.data, partial=False)
 
         if serializer.is_valid():
-            if serializer.is_valid_user(_tag, request):
+            if self.validate.is_valid_user(_tag.user, request.user):
                 serializer.update(_tag, request.data)
 
                 return Response(serializer.data, status=status.HTTP_200_OK)

@@ -9,6 +9,7 @@ from rest_framework.request import Request
 
 from core.models import Post
 from post.serializers import PostSerializer, PostDetailSerializer
+from utils.validations import ValidateSerializer
 
 
 class PostViewSet(
@@ -17,6 +18,7 @@ class PostViewSet(
     serializer_class = PostDetailSerializer
     queryset = Post.objects.all().order_by('-id')
     authentication_classes = [TokenAuthentication]
+    validate = ValidateSerializer()
 
     def get_permissions(self):
         """Define as permissões utilizadas nas rotas."""
@@ -84,7 +86,7 @@ class PostViewSet(
             instance=_post, data=request.data, partial=True)
 
         if serializer.is_valid():
-            if serializer.is_valid_user(_post, request):
+            if self.validate.is_valid_user(_post.user, request.user):
                 serializer.save()
 
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -101,11 +103,8 @@ class PostViewSet(
                 404 - Objeto não existe no banco de dados. \n
         """
         _post = get_object_or_404(self.queryset, pk=pk)
-        serializer = self.serializer_class(
-            instance=_post
-        )
 
-        if serializer.is_valid_user(_post, request):
+        if self.validate.is_valid_user(_post.user, request.user):
             _post.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
