@@ -9,6 +9,7 @@ from rest_framework.request import Request
 
 from core.models import Comment
 from comment.serializers import CommentSerializer
+from utils.validations import ValidateSerializer
 
 
 class CommentViewSet(viewsets.ViewSet):
@@ -53,3 +54,27 @@ class CommentViewSet(viewsets.ViewSet):
             return Response(serializer.data, status.HTTP_201_CREATED)
 
         return Response(serializer.data, status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request: Request, pk: int = None):
+        """
+            Recebe os dados do comentário que será atualizado e retorna um status conforme condições: \n
+                200 - Objeto atualizado com sucesso. \n
+                400 - Dados passados não são válidos. \n
+                401 - Usuário da requisição não tem permissão para atualizar esse objeto. \n
+                404 - Objeto não existe no banco de dados. \n
+        """
+        _comment = get_object_or_404(self.queryset, pk=pk)
+        serializer = self.serializer_class(
+            instance=_comment, data=request.data, partial=True
+        )
+        validate = ValidateSerializer()
+
+        if serializer.is_valid():
+            if validate.is_valid_user(_comment.user, request.user):
+                serializer.save()
+
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            return Response(serializer.data, status.HTTP_401_UNAUTHORIZED)
+
+        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)

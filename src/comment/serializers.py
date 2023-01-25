@@ -9,7 +9,7 @@ from post.serializers import PostSerializer
 def validate_reply(comment_id: int):
     """
         Valida se o id de comentário passado no reply_to existe.
-        Se não existir: raise serializers.ValidationError.
+        Se não existir: raise ValidationError.
     """
     if not Comment.objects.filter(id=comment_id):
         raise serializers.ValidationError(

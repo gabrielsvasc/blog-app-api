@@ -15,6 +15,11 @@ COMMENT_LIST_URL = reverse('comment:comment-list')
 COMMENT_CREATE_URL = reverse('comment:comment-create')
 
 
+def patch_url(comment_id):
+    """Retorna a rota patch de um comentário."""
+    return reverse('comment:comment-update', args=[comment_id])
+
+
 def create_user(email='user@example.com', password='testpass123'):
     """Cria e retorna um novo usuário."""
 
@@ -160,6 +165,28 @@ class PublicCommentApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_comment_patch_method_auth_required(self):
+        """Testa a necessidade de autenticação no método PATCH."""
+        _post = create_post(
+            user=self.user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+        _comment = create_comment(
+            user=self.user,
+            post=_post,
+            comment='test'
+        )
+        _payload = {
+            'comment': 'comments 1'
+        }
+
+        url = patch_url(_comment.id)
+        res = self.client.patch(url, _payload)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 class PrivateCommentApiTests(TestCase):
     """Testes de requisições não autenticadas."""
@@ -226,3 +253,74 @@ class PrivateCommentApiTests(TestCase):
         res = self.client.post(COMMENT_CREATE_URL, _payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_comment_success(self):
+        """Testa um update com sucesso em um comentário."""
+        _post = create_post(
+            user=self.user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+        _comment = create_comment(
+            user=self.user,
+            post=_post,
+            comment='test'
+        )
+        _payload = {
+            'comment': 'comments 1',
+        }
+
+        url = patch_url(_comment.id)
+        res = self.client.patch(url, _payload)
+        _comment.refresh_from_db()
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(_payload['comment'], _comment.comment)
+
+    def test_patch_comment_return_404(self):
+        """Testa o retorno do status code 404 quando o comentário informado não existe."""
+        _post = create_post(
+            user=self.user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+        _comment = create_comment(
+            user=self.user,
+            post=_post,
+            comment='test'
+        )
+        _payload = {
+            'comment': 'comments 1',
+        }
+        url = patch_url(_comment.id+1)
+        res = self.client.patch(url, _payload)
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_patch_comment_with_other_user(self):
+        """Testa o update permitido apenas para o usuário atrelado ao comentário."""
+        _user = create_user(
+            email='user2@test.com',
+            password='pass123'
+        )
+        _post = create_post(
+            user=self.user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+        _comment = create_comment(
+            user=_user,
+            post=_post,
+            comment='test'
+        )
+        _payload = {
+            'comment': 'comments 1',
+        }
+
+        url = patch_url(_comment.id)
+        res = self.client.patch(url, _payload)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)

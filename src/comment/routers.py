@@ -18,4 +18,11 @@ class CommentRouter(DefaultRouter):
             detail=False,
             initkwargs={}
         ),
+        Route(
+            url=r'^{prefix}/create/{lookup}$',
+            mapping={'patch': 'update'},
+            name='{basename}-update',
+            detail=True,
+            initkwargs={}
+        ),
     ]
