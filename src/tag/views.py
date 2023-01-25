@@ -64,6 +64,7 @@ class TagViewSet(viewsets.ViewSet):
 
         if self.validate.is_valid_user(_tag.user, request.user):
             _tag.delete()
+
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         return Response(serializer.data, status.HTTP_401_UNAUTHORIZED)

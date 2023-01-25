@@ -103,9 +103,12 @@ class PostViewSet(
                 404 - Objeto não existe no banco de dados. \n
         """
         _post = get_object_or_404(self.queryset, pk=pk)
+        serializer = self.serializer_class(
+            instance=_post)
 
         if self.validate.is_valid_user(_post.user, request.user):
             _post.delete()
+
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return Response(serializer.data, status=status.HTTP_401_UNAUTHORIZED)
