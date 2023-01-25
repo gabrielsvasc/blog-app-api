@@ -9,7 +9,7 @@ from post.serializers import PostSerializer
 def validate_reply(comment_id: int):
     """
         Valida se o id de comentário passado no reply_to existe.
-        Se não existir: raise ValidationError.
+            Se não existir: raise ValidationError.
     """
     if not Comment.objects.filter(id=comment_id):
         raise serializers.ValidationError(
@@ -21,14 +21,12 @@ class CommentSerializer(serializers.ModelSerializer):
     post = serializers.PrimaryKeyRelatedField(
         many=False, queryset=Post.objects.all())
 
+    user = serializers.HiddenField(
+        write_only=True, default=serializers.CurrentUserDefault())
+
     reply_to = IntegerField(validators=[validate_reply])
 
     class Meta:
         model = Comment
-        fields = ['id', 'comment', 'reply_to', 'post']
-        read_only_fields = ['id', 'user']
-
-    @staticmethod
-    def get_user(user_id: int) -> User:
-        """Retorna a instância do usuário da requisição."""
-        return User.objects.get(id=user_id)
+        fields = ['id', 'comment', 'reply_to', 'post', 'user']
+        read_only_fields = ['id']

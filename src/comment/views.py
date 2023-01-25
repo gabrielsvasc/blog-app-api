@@ -45,11 +45,11 @@ class CommentViewSet(viewsets.ViewSet):
                 201 - Objeto criado com sucesso. \n
                 400 - Dados passados não são válidos. \n
         """
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(
+            data=request.data, context={'request': request})
 
         if serializer.is_valid():
-            _user = self.serializer_class.get_user(request.user.id)
-            serializer.save(user=_user)
+            serializer.save()
 
             return Response(serializer.data, status.HTTP_201_CREATED)
 
