@@ -1,9 +1,9 @@
 """Testes para os Models da API."""
-
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
 from core import models
+from unittest.mock import patch
 
 
 def create_user(email, password):
@@ -115,3 +115,24 @@ class ModelTests(TestCase):
         )
 
         self.assertEqual(str(_comment), _comment.comment)
+
+    @patch('core.models.uuid.uuid4')
+    def test_post_file_name_uuid(self, mock_uuid):
+        """Testa o retorno de um path com o nome do arquivo ajustado."""
+        _user = create_user(
+            'test@example.com',
+            'testpass123',
+        )
+        _post = create_post(
+            _user,
+            'test',
+            'test desc',
+            'post test'
+        )
+        uuid = 'test-uuid'
+        mock_uuid.return_value = uuid
+        file_path = models.post_image_file_path(_post, 'example.jpg')
+
+        self.assertIn('post', file_path)
+        self.assertIn(f'{_post.pk}', file_path)
+        self.assertIn(f'{uuid}.jpg', file_path)

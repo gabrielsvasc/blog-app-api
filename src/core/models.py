@@ -1,6 +1,7 @@
 """Models da API."""
-
 from __future__ import annotations
+import uuid
+import os
 
 from django.db import models
 from django.contrib.auth.models import (
@@ -10,6 +11,16 @@ from django.contrib.auth.models import (
 )
 from django.conf import settings
 from django.utils import timezone
+
+
+def post_image_file_path(instance: Post, filename: str) -> str:
+    """Gera um path para uma imagem do model Post.
+        Retorna:
+            str: post/{POST_ID}/{FILENAME}.{EXT}"""
+    ext = os.path.splitext(filename)[1]
+    filename = f'{uuid.uuid4()}{ext}'
+
+    return os.path.join('post', str(instance.pk), filename)
 
 
 class UserManager(BaseUserManager):
@@ -59,6 +70,7 @@ class Post(models.Model):
     desc_post = models.TextField()
     post = models.TextField()
     datetime = models.DateTimeField(default=timezone.now)
+    image = models.ImageField(null=True, upload_to=post_image_file_path)
 
     def __str__(self) -> str:
         return self.title

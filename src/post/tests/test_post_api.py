@@ -1,12 +1,15 @@
 """Testes para a rota Ingredients da API."""
+import os
+import tempfile
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.test import TestCase
 
 from rest_framework import status
 from rest_framework.test import APIClient
-
 from core.models import Post
+from PIL import Image
+
 from post.serializers import (
     PostSerializer,
     PostDetailSerializer
@@ -36,6 +39,11 @@ def patch_url(post_id):
 def delete_url(post_id):
     """Retorna a rota patch de um Post."""
     return reverse('post:post-delete', args=[post_id])
+
+
+def upload_url(post_id):
+    """Retorna a rota para upload de uma imagem."""
+    return reverse('post:post-upload_image', args=[post_id])
 
 
 def create_post(user, title, desc_post, post) -> Post:
@@ -295,3 +303,46 @@ class PrivatePostApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertTrue(Post.objects.filter(id=_post.id).exists())
+
+
+class ImageUploadTests(TestCase):
+    """Testes para o upload de imagens na API."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            'user@test.com',
+            'password@123'
+        )
+        self.client.force_authenticate(self.user)
+        self.post = create_post(
+            user=self.user,
+            title='title 1',
+            desc_post='desc 1',
+            post='post 1',
+        )
+
+    def tearDown(self):
+        self.post.image.delete()
+
+    def test_upload_img_success(self):
+        """Testa o método de upload."""
+        url = upload_url(self.post.pk)
+        with tempfile.NamedTemporaryFile(suffix='.jpg') as image_file:
+            img = Image.new('RGB', (10, 10))
+            img.save(image_file, format='JPEG')
+            image_file.seek(0)
+            payload = {'image': image_file}
+            res = self.client.post(url, payload, format='multipart')
+
+        self.post.refresh_from_db()
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('image', res.data)
+
+    def test_upload_image_bad_request(self):
+        """Testa o upload de imagem inválida."""
+        url = upload_url(self.post.pk)
+        payload = {'image': 'notanimage'}
+        res = self.client.post(url, payload, format='multipart')
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)

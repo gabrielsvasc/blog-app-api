@@ -14,8 +14,14 @@ RUN pip install --upgrade pip && \
   adduser \
   --disabled-password \
   --no-create-home \
-  django-user
+  django-user && \
+  mkdir -p /vol/web/media && \
+  mkdir -p /vol/web/static && \
+  chown -R django-user:django-user /vol && \
+  chmod -R 755 /vol
 
 USER django-user
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+VOLUME ["/vol/web"]
+
+CMD ["python", "manage.py", "0.0.0.0:8000"]
