@@ -133,6 +133,5 @@ class ModelTests(TestCase):
         mock_uuid.return_value = uuid
         file_path = models.post_image_file_path(_post, 'example.jpg')
 
-        self.assertIn('post', file_path)
-        self.assertIn(f'{_post.pk}', file_path)
-        self.assertIn(f'{uuid}.jpg', file_path)
+        self.assertEqual(file_path[0:4], 'post')
+        self.assertEqual(file_path[-13:], f'{uuid}.jpg')

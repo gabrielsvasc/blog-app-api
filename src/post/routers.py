@@ -38,12 +38,5 @@ class PostRouter(DefaultRouter):
             name='{basename}-delete',
             detail=True,
             initkwargs={}
-        ),
-        Route(
-            url=r'^{prefix}/upload_image/{lookup}$',
-            mapping={'post': 'upload_image'},
-            name='{basename}-upload_image',
-            detail=True,
-            initkwargs={}
         )
     ]
