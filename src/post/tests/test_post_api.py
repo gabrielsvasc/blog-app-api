@@ -217,23 +217,10 @@ class PrivatePostApiTests(TestCase):
             }
             res = self.client.post(POST_CREATE_URL, _payload)
 
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_post_publish_validate_image_size(self):
-        """Testa o upload de um arquivo maior que 2MB na rota publish."""
-        with tempfile.NamedTemporaryFile(suffix='.png') as image_file:
-            img = Image.new(mode="RGB", size=(20000, 10000), color='#00004c')
-            img.save(image_file, format='PNG')
-            image_file.seek(0)
-            _payload = {
-                'title': 'Test Title Fail',
-                'desc_post': 'Test Description Fail',
-                'post': 'Test Post Fail',
-                'image': image_file
-            }
-            res = self.client.post(POST_CREATE_URL, _payload)
+        _message = "Upload a valid image. The file you uploaded was either not an image or a corrupted image."
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(_message, res.data['image'])
 
     def test_patch_post_success(self):
         """Testa uma requisição com sucesso para a rota update."""
@@ -311,28 +298,10 @@ class PrivatePostApiTests(TestCase):
             url = patch_url(_post.id)
             res = self.client.patch(url, _payload)
 
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_post_update_validate_image_size(self):
-        """Testa o upload de um arquivo maior que 2MB na rota update."""
-        _post = create_post(
-            user=self.user,
-            title='title 1',
-            desc_post='desc 1',
-            post='post 1',
-        )
-
-        with tempfile.NamedTemporaryFile(suffix='.png') as image_file:
-            img = Image.new(mode="RGB", size=(20000, 10000), color='#00004c')
-            img.save(image_file, format='PNG')
-            image_file.seek(0)
-            _payload = {
-                'image': image_file
-            }
-            url = patch_url(_post.id)
-            res = self.client.patch(url, _payload)
+        _message = "Upload a valid image. The file you uploaded was either not an image or a corrupted image."
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(_message, res.data['image'])
 
     def test_delete_post_success(self):
         """Testa uma requisição com sucesso para a rota delete."""

@@ -87,8 +87,9 @@ class PostViewSet(
 
         if serializer.is_valid():
             if self.validate.is_valid_user(_post.user, request.user):
-                _post.image.delete(save=True)
-                serializer.save()
+                validated_data = serializer.validated_data
+
+                serializer.update(_post, validated_data)
 
                 return Response(serializer.data, status=status.HTTP_200_OK)
 

@@ -16,9 +16,8 @@ import uuid
 def post_image_file_path(instance: Post, filename: str) -> str:
     """Gera um path para uma imagem do model Post.
         Retorna:
-            str: post/{POST_ID}/{FILENAME}.{EXT}"""
-    ext = os.path.splitext(filename)[1]
-    filename = f'{uuid.uuid4()}{ext}'
+            str: POST/{FILENAME}.WEBP"""
+    filename = f'{uuid.uuid4()}.webp'
 
     return os.path.join('post', filename)
 

@@ -118,7 +118,7 @@ class ModelTests(TestCase):
 
     @patch('core.models.uuid.uuid4')
     def test_post_file_name_uuid(self, mock_uuid):
-        """Testa o retorno de um path com o nome do arquivo ajustado."""
+        """Testa o retorno de um path com o nome do arquivo e formato ajustados."""
         _user = create_user(
             'test@example.com',
             'testpass123',
@@ -134,4 +134,4 @@ class ModelTests(TestCase):
         file_path = models.post_image_file_path(_post, 'example.jpg')
 
         self.assertEqual(file_path[0:4], 'post')
-        self.assertEqual(file_path[-13:], f'{uuid}.jpg')
+        self.assertEqual(file_path[-14:], f'{uuid}.webp')
