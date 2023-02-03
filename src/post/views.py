@@ -112,6 +112,6 @@ class PostViewSet(
             _post.image.delete(save=True)
             _post.delete()
 
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
 
         return Response(serializer.data, status=status.HTTP_401_UNAUTHORIZED)

@@ -1,0 +1,865 @@
+openapi: 3.0.3
+info:
+  title: ''
+  version: 0.0.0
+paths:
+  /api/schema/:
+    get:
+      operationId: api_schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /comment/:
+    get:
+      operationId: comment_list
+      description: Retorna uma lista com todos os comentários criados.
+      tags:
+      - comment
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+          description: ''
+  /comment/create/:
+    post:
+      operationId: comment_create_create
+      description: |-
+        Recebe os dados do Comentário que será criado
+        e retorna um status conforme condições:
+
+            201 - Objeto criado com sucesso.
+
+            400 - Dados passados não são válidos.
+      tags:
+      - comment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+          description: ''
+  /comment/delete/{id}:
+    delete:
+      operationId: comment_delete_destroy
+      description: |-
+        Recebe o ID do comentário que será deletado e retorna um status conforme condições:
+
+            204 - Objeto deletado com sucesso.
+
+            401 - Usuário da requisição não tem permissão para deletar esse objeto.
+
+            404 - Objeto não existe no banco de dados.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this comment.
+        required: true
+      tags:
+      - comment
+      security:
+      - tokenAuth: []
+      responses:
+        '204':
+          description: No response body
+  /comment/update/{id}:
+    patch:
+      operationId: comment_update_partial_update
+      description: |-
+        Recebe os dados do comentário que será atualizado e retorna um status conforme condições:
+
+            200 - Objeto atualizado com sucesso.
+
+            400 - Dados passados não são válidos.
+
+            401 - Usuário da requisição não tem permissão para atualizar esse objeto.
+
+            404 - Objeto não existe no banco de dados.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this comment.
+        required: true
+      tags:
+      - comment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCommentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCommentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCommentRequest'
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+          description: ''
+  /post/:
+    get:
+      operationId: post_list
+      description: |-
+        Retorna uma lista com todos os Posts resumidos.
+            200 - Objeto retornado com sucesso.
+      tags:
+      - post
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+          description: ''
+  /post/{id}:
+    get:
+      operationId: post_retrieve
+      description: |-
+        Retorna um post detalhado se o objeto informado existir:
+
+            200 - Objeto retornado com sucesso.
+
+            404 - Objeto não existe no banco de dados.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this post.
+        required: true
+      tags:
+      - post
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostDetail'
+          description: ''
+  /post/delete/{id}:
+    delete:
+      operationId: post_delete_destroy
+      description: |-
+        Recebe o ID do Post que será deletado e retorna um status conforme condições:
+
+            204 - Objeto deletado com sucesso.
+
+            401 - Usuário da requisição não tem permissão para deletar esse objeto.
+
+            404 - Objeto não existe no banco de dados.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this post.
+        required: true
+      tags:
+      - post
+      security:
+      - tokenAuth: []
+      responses:
+        '204':
+          description: No response body
+  /post/publish/:
+    post:
+      operationId: post_publish_create
+      description: |-
+        Recebe os dados do Post que será criado e retorna um status conforme condições:
+
+            201 - Objeto criado com sucesso.
+
+            400 - Dados passados não são válidos.
+      tags:
+      - post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostDetailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PostDetailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostDetailRequest'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostDetail'
+          description: ''
+  /post/update/{id}:
+    patch:
+      operationId: post_update_partial_update
+      description: |-
+        Recebe os dados do Post que será atualizado e retorna um status conforme condições:
+
+            200 - Objeto atualizado com sucesso.
+
+            400 - Dados passados não são válidos.
+
+            401 - Usuário da requisição não tem permissão para atualizar esse objeto.
+
+            404 - Objeto não existe no banco de dados.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this post.
+        required: true
+      tags:
+      - post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPostDetailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPostDetailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPostDetailRequest'
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostDetail'
+          description: ''
+  /tag/:
+    get:
+      operationId: tag_list
+      description: Retorna uma lista com todas as Tags criadas.
+      tags:
+      - tag
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+          description: ''
+  /tag/create/:
+    post:
+      operationId: tag_create_create
+      description: |-
+        Recebe os dados da Tag que será criada e retorna um status conforme condições:
+
+            201 - Objeto criado com sucesso.
+
+            400 - Dados passados não são válidos.
+      tags:
+      - tag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TagRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TagRequest'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+          description: ''
+  /tag/delete/{tag}:
+    delete:
+      operationId: tag_delete_destroy
+      description: |-
+        Recebe a Tag que será deletada e retorna um status conforme condições:
+
+            204 - Objeto deletado com sucesso.
+
+            401 - Usuário da requisição não tem permissão para deletar esse objeto.
+
+            404 - Objeto não existe no banco de dados.
+      parameters:
+      - in: path
+        name: tag
+        schema:
+          type: string
+        description: A unique value identifying this tag.
+        required: true
+      tags:
+      - tag
+      security:
+      - tokenAuth: []
+      responses:
+        '204':
+          description: No response body
+  /user/create/:
+    post:
+      operationId: user_create_create
+      description: View para criação de User.
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /user/me/:
+    get:
+      operationId: user_me_retrieve
+      description: Administra o User autenticado.
+      tags:
+      - user
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: user_me_update
+      description: Administra o User autenticado.
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+        required: true
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: user_me_partial_update
+      description: Administra o User autenticado.
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /user/token/:
+    post:
+      operationId: user_token_create
+      description: View para criação de Auth Token para o User.
+      tags:
+      - user
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AuthTokenRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AuthTokenRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthTokenRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+          description: ''
+components:
+  schemas:
+    AuthToken:
+      type: object
+      description: Serializer para o User Auth Token.
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+      - email
+      - password
+    AuthTokenRequest:
+      type: object
+      description: Serializer para o User Auth Token.
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+      required:
+      - email
+      - password
+    Comment:
+      type: object
+      description: Serializer para a tabela Comment.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        comment:
+          type: string
+        reply_to:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        post:
+          type: integer
+      required:
+      - comment
+      - id
+      - post
+    CommentRequest:
+      type: object
+      description: Serializer para a tabela Comment.
+      properties:
+        comment:
+          type: string
+          minLength: 1
+        reply_to:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        post:
+          type: integer
+      required:
+      - comment
+      - post
+    PatchedCommentRequest:
+      type: object
+      description: Serializer para a tabela Comment.
+      properties:
+        comment:
+          type: string
+          minLength: 1
+        reply_to:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        post:
+          type: integer
+    PatchedPostDetailRequest:
+      type: object
+      description: Serializer para o detalhamento do Post.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 120
+        desc_post:
+          type: string
+          minLength: 1
+        image:
+          type: string
+          format: binary
+          nullable: true
+        post:
+          type: string
+          minLength: 1
+    PatchedUserRequest:
+      type: object
+      description: Serializer para o User.
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 255
+        password:
+          type: string
+          writeOnly: true
+          minLength: 5
+          maxLength: 128
+        name:
+          type: string
+          minLength: 1
+          maxLength: 60
+    Post:
+      type: object
+      description: Serializer para a tabela de Posts.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 120
+        desc_post:
+          type: string
+        image:
+          type: string
+          format: uri
+          nullable: true
+      required:
+      - desc_post
+      - id
+      - title
+    PostDetail:
+      type: object
+      description: Serializer para o detalhamento do Post.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 120
+        desc_post:
+          type: string
+        image:
+          type: string
+          format: uri
+          nullable: true
+        post:
+          type: string
+      required:
+      - desc_post
+      - id
+      - image
+      - post
+      - title
+    PostDetailRequest:
+      type: object
+      description: Serializer para o detalhamento do Post.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 120
+        desc_post:
+          type: string
+          minLength: 1
+        image:
+          type: string
+          format: binary
+          nullable: true
+        post:
+          type: string
+          minLength: 1
+      required:
+      - desc_post
+      - image
+      - post
+      - title
+    Tag:
+      type: object
+      description: Serializer para a tabela de Tags.
+      properties:
+        tag:
+          type: string
+          maxLength: 40
+      required:
+      - tag
+    TagRequest:
+      type: object
+      description: Serializer para a tabela de Tags.
+      properties:
+        tag:
+          type: string
+          minLength: 1
+          maxLength: 40
+      required:
+      - tag
+    User:
+      type: object
+      description: Serializer para o User.
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        name:
+          type: string
+          maxLength: 60
+      required:
+      - email
+      - name
+    UserRequest:
+      type: object
+      description: Serializer para o User.
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 255
+        password:
+          type: string
+          writeOnly: true
+          minLength: 5
+          maxLength: 128
+        name:
+          type: string
+          minLength: 1
+          maxLength: 60
+      required:
+      - email
+      - name
+      - password
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"

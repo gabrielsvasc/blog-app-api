@@ -11,7 +11,7 @@ Este projeto utiliza a linguagem Python, com a estrutura do Django em conjunto d
 
 # Descrição
 
-
+Os recursos desta API permitem criar postagens, associar tags, criar e responder comentários, tudo isso de forma simplificada e segura, utilizando Tokens em todas as rotas de POST, PATCH, PUT e DELETE.
 
 # Contatos
 
@@ -20,5 +20,6 @@ Gabriel Vasconcelos - [Linkedin](https://www.linkedin.com/in/gabrielsvasc99/)
 # Docs
 
 Fontes utilizadas neste repositório.
-* [Django](https://docs.djangoproject.com/en/4.1/)
-* [Django REST Framework](https://www.django-rest-framework.org/#development)
+
+- [Django](https://docs.djangoproject.com/en/4.1/)
+- [Django REST Framework](https://www.django-rest-framework.org/#development)
