@@ -23,4 +23,3 @@ Fontes utilizadas neste repositório.
 
 - [Django](https://docs.djangoproject.com/en/4.1/)
 - [Django REST Framework](https://www.django-rest-framework.org/#development)
-- [Udemy](https://itau.udemy.com/course/django-python-advanced/learn/lecture/32236722?start=60#reviews)
